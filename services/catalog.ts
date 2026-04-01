@@ -13,4 +13,4 @@ interface PlantCardResponse {
     common_name: string;
     price: number;
     url: string;
-}
+};

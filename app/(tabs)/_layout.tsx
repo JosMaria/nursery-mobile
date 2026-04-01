@@ -10,7 +10,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'white',
+        tabBarActiveTintColor: '#FFF',
         tabBarInactiveTintColor: '#9e9e9e',
         tabBarStyle: {
           backgroundColor: '#0D5302',
@@ -24,7 +24,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Catalog',
+          title: 'Plantas',
           tabBarIcon: ({ color }) => <Ionicons size={28} name="leaf" color={color} />,
         }}
       />
