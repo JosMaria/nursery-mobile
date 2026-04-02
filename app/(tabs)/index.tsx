@@ -1,9 +1,9 @@
-import { catalogService } from '@/services/catalog';
-import { useQuery } from '@tanstack/react-query';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
+import { catalogService, PlantCardResponse } from '@/services/catalog';
+import { useQuery } from '@tanstack/react-query';
+
 export default function HomeScreen() {
-  console.log("esta ahora mismo")
   const { data: plantCards, isPending, error } = useQuery({
     queryKey: ['plantCards'],
     queryFn: () => catalogService.fetchPlantCards()
@@ -17,91 +17,75 @@ export default function HomeScreen() {
   )
   
   if (error) return (
-    <View style={styles.centerContainer}>
+    <View>
       <Text style={{ color: 'red' }}>
         An error has occurred: {error.message}
       </Text>
     </View>
   )
   return (
-    <FlatList
-      data={plantCards}
-      keyExtractor={(plantCard) => plantCard.id.toString()}
-      numColumns={2}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item: plantCard }) => (
-        <View style={styles.cardContainer}>
-          <Image
-            source={{ uri: `http://192.168.100.53:8080/api/v1/plants/${plantCard.id}/images`}}
-            style={styles.image}
-          />
-          <Text style={styles.commonName}>{plantCard.common_name}</Text>
-          <Text style={styles.scientificName}>{plantCard.scientific_name}</Text>
-          <Text style={styles.price}>{plantCard.price}</Text>
-        </View>
-        )}
-    />
+    <View style={styles.container}>  
+      <FlatList
+        data={plantCards}
+        keyExtractor={(plantCard) => plantCard.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-evenly' }}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item: plantCardResponse }) => <PlantCard plant={plantCardResponse} />}
+      />
+    </View>
   );
 }
 
+interface PlantCardProps {
+  plant: PlantCardResponse
+}
+
+const PlantCard = ({ plant }: PlantCardProps) => (
+  <View style={styles.cardContainer}>
+    <Image
+      source={{ uri: `http://192.168.100.53:8080/api/v1/plants/${plant.id}/images`}}
+      style={styles.image}
+    />
+    <Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
+    <Text numberOfLines={1} style={styles.scientificName}>{plant.scientific_name}</Text>
+    <Text style={styles.price}>Bs. {plant.price}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#a3b18a',
+  },
   listContainer: {
-    padding: 12,
     gap: 16
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
   cardContainer: {
-    width: '48%',              // ~50% menos un pequeño margen
-    backgroundColor: 'white',
-    borderRadius: 12,
-    marginBottom: 15,
-    padding: 12, 
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    elevation: 3,
+    width: '45%',
+    backgroundColor: '#dad7cd',
+    borderRadius: 6,
+    padding: 6
   },
   image: {
     width: '100%',
     height: 150,
-    borderRadius: 8,
-    
-    marginBottom: 10,
+    borderRadius: 6,
+    marginBottom: 6
   },
   commonName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: 'bold'
   },
   scientificName: {
     fontSize: 12,
     color: '#666',
     fontStyle: 'italic',
-    marginBottom: 6,
+    fontWeight: 'bold'
   },
   price: {
     fontSize: 14,
     color: '#2e7d32',
-    fontWeight: '600',
-  },
-  plantCardsContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: '1em'
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5'
-  },
-  scrollViewContent: {
-    flexGrow: 1,
+    fontWeight: '600'
   },
 });

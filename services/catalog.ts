@@ -7,7 +7,7 @@ export const catalogService = {
     }
 };
 
-interface PlantCardResponse {
+export interface PlantCardResponse {
     id: number;
     scientific_name: string;
     common_name: string;
