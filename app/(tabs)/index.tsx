@@ -1,6 +1,6 @@
 import { catalogService } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   console.log("esta ahora mismo")
@@ -19,30 +19,36 @@ export default function HomeScreen() {
   if (error) return (
     <View style={styles.centerContainer}>
       <Text style={{ color: 'red' }}>
-        An error has occurred: {error.message} Cause: {error.stack}
+        An error has occurred: {error.message}
       </Text>
     </View>
   )
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.plantCardsContainer}>
-        {plantCards.map(plantCard => 
-          <View key={plantCard.id} style={styles.cardContainer}>
-            <Image
-              source={{ uri: `http://192.168.70.167:8080/api/v1/plants/${plantCard.id}/images`}}
-              style={styles.image}
-            />
-            <Text style={styles.commonName}>{plantCard.common_name}</Text>
-            <Text style={styles.scientificName}>{plantCard.scientific_name}</Text>
-            <Text style={styles.price}>{plantCard.price}</Text>
-          </View>
+    <FlatList
+      data={plantCards}
+      keyExtractor={(plantCard) => plantCard.id.toString()}
+      numColumns={2}
+      contentContainerStyle={styles.listContainer}
+      renderItem={({ item: plantCard }) => (
+        <View style={styles.cardContainer}>
+          <Image
+            source={{ uri: `http://192.168.100.53:8080/api/v1/plants/${plantCard.id}/images`}}
+            style={styles.image}
+          />
+          <Text style={styles.commonName}>{plantCard.common_name}</Text>
+          <Text style={styles.scientificName}>{plantCard.scientific_name}</Text>
+          <Text style={styles.price}>{plantCard.price}</Text>
+        </View>
         )}
-      </View>
-    </ScrollView>
+    />
   );
 }
 
 const styles = StyleSheet.create({
+  listContainer: {
+    padding: 12,
+    gap: 16
+  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
