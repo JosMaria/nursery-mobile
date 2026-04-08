@@ -1,4 +1,7 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import {
+    ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
+} from 'react-native';
 
 import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
@@ -42,7 +45,10 @@ interface PlantCardProps {
 }
 
 const PlantCard = ({ plant }: PlantCardProps) => (
-  <View style={styles.cardContainer}>
+  <TouchableOpacity style={styles.cardContainer} onPress={() => router.push({
+    pathname: '/plant/[id]',
+    params: { id: plant.id.toString() }
+  })}>
     <Image
       source={{ uri: `http://192.168.100.53:8080/api/v1/plants/${plant.id}/images`}}
       style={styles.image}
@@ -50,7 +56,7 @@ const PlantCard = ({ plant }: PlantCardProps) => (
     <Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
     <Text numberOfLines={1} style={styles.scientificName}>{plant.scientific_name}</Text>
     <Text style={styles.price}>Bs. {plant.price}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

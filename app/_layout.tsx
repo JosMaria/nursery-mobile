@@ -1,28 +1,45 @@
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { Tabs } from 'expo-router';
+
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: '#a3b18a',
+          tabBarInactiveTintColor: '#dad7cd',
+          tabBarStyle: {
+            backgroundColor: '#344e41',
+            height: 60,
+            paddingBottom: 60,
+            paddingTop: 5
+          }      
+        }}
+        >
+          <Tabs.Screen
+            name='index'
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome name='leaf' color={color} size={size} />
+              )
+            }}
+          />
+          <Tabs.Screen
+            name='information'
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name='information-circle' color={color} size={size} />
+              )
+            }}
+          />
+      </Tabs>      
     </QueryClientProvider>
   );
 }
