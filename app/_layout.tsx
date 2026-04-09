@@ -2,7 +2,7 @@ import 'react-native-reanimated';
 
 import { Tabs } from 'expo-router';
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -13,7 +13,7 @@ export default function RootLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: '#a3b18a',
+          tabBarActiveTintColor: '#fff',
           tabBarInactiveTintColor: '#dad7cd',
           tabBarStyle: {
             backgroundColor: '#344e41',
@@ -24,10 +24,10 @@ export default function RootLayout() {
         }}
         >
           <Tabs.Screen
-            name='index'
+            name='(plants)'
             options={{
-              tabBarIcon: ({ color, size }) => (
-                <FontAwesome name='leaf' color={color} size={size} />
+              tabBarIcon: ({ focused, color, size }) => (
+                <Ionicons name={focused ? 'leaf-sharp' : 'leaf-outline'} color={color} size={size} />
               )
             }}
           />
@@ -39,7 +39,7 @@ export default function RootLayout() {
               )
             }}
           />
-      </Tabs>      
+      </Tabs>
     </QueryClientProvider>
   );
 }
