@@ -12,7 +12,6 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <Tabs
         screenOptions={{
-          headerShown: false,
           tabBarActiveTintColor: '#fff',
           tabBarInactiveTintColor: '#dad7cd',
           tabBarStyle: {
@@ -20,12 +19,17 @@ export default function RootLayout() {
             height: 60,
             paddingBottom: 60,
             paddingTop: 5
-          }      
+          },
+          sceneStyle: {
+            padding: 4,
+            backgroundColor: '#a3b18a'
+          }
         }}
         >
           <Tabs.Screen
             name='(plants)'
             options={{
+              headerShown: false,
               tabBarIcon: ({ focused, color, size }) => (
                 <Ionicons name={focused ? 'leaf-sharp' : 'leaf-outline'} color={color} size={size} />
               )

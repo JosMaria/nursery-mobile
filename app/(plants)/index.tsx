@@ -63,10 +63,9 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#a3b18a',
 	},
 	listContainer: {
-		gap: 16
+		gap: 12
 	},
 	cardContainer: {
 		width: '45%',
