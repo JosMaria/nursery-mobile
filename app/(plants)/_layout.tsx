@@ -10,15 +10,10 @@ export default function Layout() {
 		>
 			<Stack.Screen 
 				name='index'
-				options={{
-					headerShown: false
-				}}
+				options={{ headerShown: false }}
 			/>
 			<Stack.Screen 
 				name='[id]'
-				options={{
-					
-				}}
 			/>
 		</Stack>
 	);

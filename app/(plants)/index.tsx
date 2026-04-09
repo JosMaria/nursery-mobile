@@ -3,10 +3,12 @@ import {
 	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
 
-import { catalogService } from '@/services/catalog';
+import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function IndexScreen() {
+	const insets = useSafeAreaInsets();
 	const { data: plantCards, isPending, error } = useQuery({
     queryKey: ['plantCards'],
     queryFn: () => catalogService.fetchPlantCards()
@@ -28,7 +30,7 @@ export default function IndexScreen() {
   );
 
 	return (
-		<View style={styles.container}>  
+		<View style={[styles.container, { marginTop: insets.top }]}>  
 			<FlatList
 				data={plantCards}
 				keyExtractor={(plantCard) => plantCard.id.toString()}
