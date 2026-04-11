@@ -53,7 +53,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 		params: { id: plant.id.toString() }
 	})}>
 		<Image
-			source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plant.id}/images`}}
+			source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plant.id}/images/card`}}
 			style={styles.image}
 		/>
 		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>

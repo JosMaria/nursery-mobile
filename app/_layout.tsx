@@ -32,7 +32,6 @@ function TabNavigator() {
           height: 50 + bottomPadding
         },
         sceneStyle: {
-          padding: 4,
           backgroundColor: '#a3b18a'
         }
       }}

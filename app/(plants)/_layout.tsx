@@ -5,15 +5,21 @@ export default function Layout() {
 		<Stack 
 			screenOptions={{
 				headerShown: true,
-				contentStyle: { backgroundColor: '#a3b18a' }
+				headerTintColor: 'white',
+				headerTitleAlign: 'center',
+				headerStyle: { backgroundColor: '#344e41' },
+				contentStyle: { backgroundColor: '#a3b18a', padding: 8 }
 			}}
 		>
 			<Stack.Screen 
 				name='index'
 				options={{ headerShown: false }}
 			/>
-			<Stack.Screen 
+			<Stack.Screen
 				name='[id]'
+				options={{
+					title: 'Detalles'
+				}}
 			/>
 		</Stack>
 	);
