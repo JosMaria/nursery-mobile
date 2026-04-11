@@ -1,11 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Dimensions, FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 import { catalogService } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-
-const { width: windowWidth } = Dimensions.get('screen')
 
 export default function PlantLayout() {
 	const { id } = useLocalSearchParams();
@@ -28,20 +26,29 @@ export default function PlantLayout() {
 		<View style={styles.containerImage}>
 			<FlatList 
 				data={plantDetails.images_info}
-				style={{ backgroundColor: 'pink', flex: 1 }}
+				style={styles.containerSmallImages}
 				keyExtractor={(imageInfo) => imageInfo.filename} 
-				contentContainerStyle={{ gap: 5 }}
+				contentContainerStyle={{
+					flex: 1,
+					display: 'flex',
+					justifyContent: 'center', 
+					gap: 5
+				}}
+				scrollEnabled
 				renderItem={({ item: image_info }) => (
 					<Image 
-						source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${image_info.filename}`}}
-						style={styles.image}
+						source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${image_info.filename}` }}
+						defaultSource={require('@/assets/images/default_image.png')}
+						style={styles.smallImage}
 						resizeMode='stretch'
 					/>
 				)}
 			/>
 			<Image 
 				source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=1d7ba99e-e7ae-4b13-8a3c-803ecd24c15a.png` }}
-				style={{ flex: 4 }}
+				defaultSource={require('@/assets/images/default_image.png')}
+				style={styles.mainImage}
+				resizeMode='stretch'
 			/>
 		</View>
 	);
@@ -54,14 +61,27 @@ function obtainPlantId(id: string | string[]) {
 
 const styles = StyleSheet.create({
 	containerImage: {
-		height: 250,
 		display: 'flex',
 		flexDirection: 'row',
-		gap: 10
+		gap: 10,
+		height: 300,
+		backgroundColor: 'white'
 	},
-	image: {
+	containerSmallImages: {
+		minWidth: 55
+	},
+	smallImage: {
+		width: 'auto',
 		height: 55,
+		borderRadius: 1,
 		borderColor: '#344e41',
 		borderWidth: 2
+	},
+	mainImage: {
+		flex: 4,
+		height: 'auto',
+		borderRadius: 10,
+		borderColor: '#344e41',
+		borderWidth: 4
 	}
 });
