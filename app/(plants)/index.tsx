@@ -2,10 +2,10 @@ import { router } from 'expo-router';
 import {
 	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function IndexScreen() {
 	const insets = useSafeAreaInsets();

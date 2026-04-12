@@ -1,18 +1,25 @@
 import { useLocalSearchParams } from 'expo-router';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { catalogService } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+
+const defaultImagePath: string = '@/assets/images/default_image.png';
 
 export default function PlantLayout() {
 	const { id } = useLocalSearchParams();
 	const plantId = obtainPlantId(id);
-	const [activeIndex, setActiveIndex] = useState(0);
+	const [activedUriImage, setActivedUriImage] = useState<string>(defaultImagePath);
+
 	const { data: plantDetails, isPending, error } = useQuery({
 		queryKey: ['plantDetails'],
 		queryFn: () => catalogService.fetchPlantDetailsById(plantId)
 	});
+
+	const changeUriImage = (uriImage: string) => {
+		setActivedUriImage(uriImage);
+	}
 
 	if (isPending) return (
 		<Text>Pending...</Text>
@@ -26,31 +33,58 @@ export default function PlantLayout() {
 		<View style={styles.containerImage}>
 			<FlatList 
 				data={plantDetails.images_info}
-				style={styles.containerSmallImages}
+				style={{ maxWidth: 60, backgroundColor: 'blue' }}
 				keyExtractor={(imageInfo) => imageInfo.filename} 
 				contentContainerStyle={{
-					flex: 1,
 					display: 'flex',
+					flexDirection: 'column',
 					justifyContent: 'center', 
 					gap: 5
 				}}
-				scrollEnabled
 				renderItem={({ item: image_info }) => (
-					<Image 
-						source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${image_info.filename}` }}
-						defaultSource={require('@/assets/images/default_image.png')}
-						style={styles.smallImage}
-						resizeMode='stretch'
-					/>
+					<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} />
 				)}
 			/>
 			<Image 
-				source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=1d7ba99e-e7ae-4b13-8a3c-803ecd24c15a.png` }}
-				defaultSource={require('@/assets/images/default_image.png')}
-				style={styles.mainImage}
+				source={{uri: activedUriImage }}
+				defaultSource={require(defaultImagePath)}
+				style={{
+					flex: 1,
+					height: 'auto',
+					borderRadius: 10,
+					borderColor: '#344e41',
+					borderWidth: 4
+				}}
 				resizeMode='stretch'
 			/>
 		</View>
+	);
+}
+
+interface SmallImageProps {
+	plantId: number;
+	filename: string;
+	changeUriImage: (uri: string) => void;
+}
+
+const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage }) => {
+	const uri = `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${filename}`;
+	return (
+		<TouchableOpacity onPress={() => changeUriImage(uri)}
+			style={{ height: 60 }}>
+			<Image 
+				source={{ uri }}
+				defaultSource={require(defaultImagePath)}
+				style={{
+					height: '100%',
+					// borderRadius: 1,
+					// borderColor: '#344e41',
+					// borderWidth: 2
+				}}
+				resizeMode='stretch'
+				
+			/>
+		</TouchableOpacity>
 	);
 }
 
@@ -65,23 +99,22 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		gap: 10,
 		height: 300,
-		backgroundColor: 'white'
+		backgroundColor: 'pink',
 	},
 	containerSmallImages: {
-		minWidth: 55
+		width: 'auto',
+		backgroundColor: 'blue'
 	},
 	smallImage: {
-		width: 'auto',
-		height: 55,
-		borderRadius: 1,
-		borderColor: '#344e41',
-		borderWidth: 2
+		
+		// height: 55,
+		// borderRadius: 1,
+		// borderColor: '#344e41',
+		// borderWidth: 2
 	},
 	mainImage: {
-		flex: 4,
+		width: 0,
 		height: 'auto',
-		borderRadius: 10,
-		borderColor: '#344e41',
-		borderWidth: 4
+		borderRadius: 10
 	}
 });
