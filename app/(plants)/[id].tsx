@@ -33,16 +33,15 @@ export default function PlantLayout() {
 		<View style={styles.containerImage}>
 			<FlatList 
 				data={plantDetails.images_info}
-				style={{ maxWidth: 60, backgroundColor: 'blue' }}
+				style={{ maxWidth: 60 }}
 				keyExtractor={(imageInfo) => imageInfo.filename} 
 				contentContainerStyle={{
-					display: 'flex',
-					flexDirection: 'column',
-					justifyContent: 'center', 
-					gap: 5
+					justifyContent: 'center',					
+					gap: 5,
+					height: '100%',
 				}}
 				renderItem={({ item: image_info }) => (
-					<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} />
+					<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} activedUri={activedUriImage} />
 				)}
 			/>
 			<Image 
@@ -65,9 +64,10 @@ interface SmallImageProps {
 	plantId: number;
 	filename: string;
 	changeUriImage: (uri: string) => void;
+	activedUri: string;
 }
 
-const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage }) => {
+const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
 	const uri = `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${filename}`;
 	return (
 		<TouchableOpacity onPress={() => changeUriImage(uri)}
@@ -75,14 +75,13 @@ const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriIma
 			<Image 
 				source={{ uri }}
 				defaultSource={require(defaultImagePath)}
-				style={{
-					height: '100%',
-					// borderRadius: 1,
-					// borderColor: '#344e41',
-					// borderWidth: 2
-				}}
+				style={[{ height: '100%'}, activedUri === uri && {
+					opacity: 0.8,
+					borderRadius: 1,
+					borderColor: '#344e41',
+					borderWidth: 3
+				}]}
 				resizeMode='stretch'
-				
 			/>
 		</TouchableOpacity>
 	);
@@ -98,23 +97,6 @@ const styles = StyleSheet.create({
 		display: 'flex',
 		flexDirection: 'row',
 		gap: 10,
-		height: 300,
-		backgroundColor: 'pink',
-	},
-	containerSmallImages: {
-		width: 'auto',
-		backgroundColor: 'blue'
-	},
-	smallImage: {
-		
-		// height: 55,
-		// borderRadius: 1,
-		// borderColor: '#344e41',
-		// borderWidth: 2
-	},
-	mainImage: {
-		width: 0,
-		height: 'auto',
-		borderRadius: 10
+		height: 300
 	}
 });
