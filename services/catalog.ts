@@ -11,12 +11,13 @@ export const catalogService = {
     }
 };
 
-export interface PlantDetails {
+export type PlantDetails = {
     common_names: {
         id: string;
         name: string;
         country: string | undefined;
         place: string | undefined;
+        isSelected: boolean;
     }[],
     id: number;
     price:number;

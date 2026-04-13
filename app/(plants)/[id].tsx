@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { catalogService } from '@/services/catalog';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useQuery } from '@tanstack/react-query';
 
 const defaultImagePath: string = '@/assets/images/default_image.png';
@@ -40,32 +41,72 @@ export default function PlantLayout() {
 	);
 
 	return (
-		<View style={styles.containerImage}>
-			<FlatList 
-				data={plantDetails.images_info}
-				style={{ maxWidth: 60 }}
-				keyExtractor={(imageInfo) => imageInfo.filename} 
-				contentContainerStyle={{
-					justifyContent: 'center',					
-					gap: 5,
-					height: '100%',
-				}}
-				renderItem={({ item: image_info }) => (
-					<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} activedUri={activedUriImage} />
-				)}
-			/>
-			<Image 
-				source={activedUriImage ? { uri: activedUriImage } : require(defaultImagePath)}
-				defaultSource={require(defaultImagePath)}
-				style={{
-					flex: 1,
-					height: 'auto',
-					borderRadius: 10,
-					borderColor: '#344e41',
-					borderWidth: 4
-				}}
-				resizeMode='stretch'
-			/>
+		<View style={{ gap: 5 }}>
+			<View style={styles.containerImage}>
+				<FlatList 
+					data={plantDetails.images_info}
+					style={{ maxWidth: 60 }}
+					keyExtractor={(imageInfo) => imageInfo.filename} 
+					contentContainerStyle={{
+						justifyContent: 'center',					
+						gap: 5,
+						height: '100%',
+					}}
+					renderItem={({ item: image_info }) => (
+						<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} activedUri={activedUriImage} />
+					)}
+				/>
+				<Image 
+					source={activedUriImage ? { uri: activedUriImage } : require(defaultImagePath)}
+					defaultSource={require(defaultImagePath)}
+					resizeMode='stretch'
+					style={{
+						flex: 1,
+						height: 'auto',
+						borderRadius: 10,
+						borderColor: '#344e41',
+						borderWidth: 4
+					}}
+				/>
+			</View>
+			<View style={{ backgroundColor: 'white' }}>
+				<SectionDate updatedAt={plantDetails.updated_at} />
+			</View>
+		</View>
+	);
+}
+
+interface SectionDateProps {
+	updatedAt: string;
+}
+
+const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
+	const date = new Date(updatedAt);
+	return (
+		<View style={{ gap: 4 }}>
+			<Text style={{ fontSize: 13, fontStyle: 'italic', color: 'gray' }}>Última actualización</Text>
+			<View style={{
+				display: 'flex',
+				flexDirection: 'row',
+				alignItems: 'center',
+				gap: 8
+			}}>
+				<View style={{ 
+					display: 'flex', 
+					justifyContent: 'center', 
+					alignItems: 'center', 
+					backgroundColor: '#e9edc9', 
+					width: 40, 
+					height: 40, 
+					borderRadius: '50%'
+				}}>
+					<FontAwesome5 name="calendar-alt" color="black" size={24}  />
+				</View>
+				<View style={{ flexDirection: 'column' }}>
+					<Text>{date.getDate().toString().padStart(2, '0')} {date.toLocaleString('es', { month: 'short' })}, {date.getFullYear()}</Text>
+					<Text>{date.getHours().toString().padStart(2, '0')}:{date.getMinutes().toString().padStart(2, '0')}</Text>
+				</View>
+			</View>
 		</View>
 	);
 }
@@ -85,13 +126,13 @@ const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriIma
 			<Image 
 				source={{ uri }}
 				defaultSource={require(defaultImagePath)}
+				resizeMode='stretch'
 				style={[{ height: '100%' }, activedUri === uri && {
 					opacity: 0.8,
 					borderRadius: 1,
 					borderColor: '#344e41',
 					borderWidth: 3
 				}]}
-				resizeMode='stretch'
 			/>
 		</TouchableOpacity>
 	);
@@ -107,6 +148,6 @@ const styles = StyleSheet.create({
 		display: 'flex',
 		flexDirection: 'row',
 		gap: 10,
-		height: 300
+		height: 280
 	}
 });
