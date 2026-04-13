@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { catalogService } from '@/services/catalog';
@@ -10,9 +10,9 @@ const defaultImagePath: string = '@/assets/images/default_image.png';
 export default function PlantLayout() {
 	const { id } = useLocalSearchParams();
 	const plantId = obtainPlantId(id);
-	const [activedUriImage, setActivedUriImage] = useState<string>(defaultImagePath);
+	const [activedUriImage, setActivedUriImage] = useState<string | undefined>();
 
-	const { data: plantDetails, isPending, error } = useQuery({
+	const { data: plantDetails, isPending, error, isSuccess } = useQuery({
 		queryKey: ['plantDetails'],
 		queryFn: () => catalogService.fetchPlantDetailsById(plantId)
 	});
@@ -20,6 +20,16 @@ export default function PlantLayout() {
 	const changeUriImage = (uriImage: string) => {
 		setActivedUriImage(uriImage);
 	}
+
+	useEffect(() => {
+		const limit = plantDetails?.images_info.length;
+		if (limit && limit > 0) {
+			const elementSelected = Math.floor(Math.random() * limit);
+			const { filename } = plantDetails.images_info[elementSelected];
+			const uri = `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${filename}`;
+			changeUriImage(uri);
+		}
+	}, [isSuccess]);
 
 	if (isPending) return (
 		<Text>Pending...</Text>
@@ -45,7 +55,7 @@ export default function PlantLayout() {
 				)}
 			/>
 			<Image 
-				source={{uri: activedUriImage }}
+				source={activedUriImage ? { uri: activedUriImage } : require(defaultImagePath)}
 				defaultSource={require(defaultImagePath)}
 				style={{
 					flex: 1,
@@ -64,7 +74,7 @@ interface SmallImageProps {
 	plantId: number;
 	filename: string;
 	changeUriImage: (uri: string) => void;
-	activedUri: string;
+	activedUri: string | undefined;
 }
 
 const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
@@ -75,7 +85,7 @@ const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriIma
 			<Image 
 				source={{ uri }}
 				defaultSource={require(defaultImagePath)}
-				style={[{ height: '100%'}, activedUri === uri && {
+				style={[{ height: '100%' }, activedUri === uri && {
 					opacity: 0.8,
 					borderRadius: 1,
 					borderColor: '#344e41',
