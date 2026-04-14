@@ -1,25 +1,18 @@
 import { router } from 'expo-router';
-import {
-	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Loading } from '@/components/Loading';
+import { DOMAIN } from '@/constants/enviroment';
 import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
-	const insets = useSafeAreaInsets();
 	const { data: plantCards, isPending, error } = useQuery({
     queryKey: ['plantCards'],
     queryFn: () => catalogService.fetchPlantCards()
   });
 	
-	if (isPending) return (
-		<View>
-			<ActivityIndicator size="large" color="#0D5302" />
-			<Text>Loading...</Text>
-		</View>
-	);
+	if (isPending) return <Loading />
 
 	if (error) return (
     <View>
@@ -30,7 +23,7 @@ export default function IndexScreen() {
   );
 
 	return (
-		<View style={[styles.container, { marginTop: insets.top }]}>  
+		<View style={[styles.container]}>  
 			<FlatList
 				data={plantCards}
 				keyExtractor={(plantCard) => plantCard.id.toString()}
@@ -53,7 +46,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 		params: { id: plant.id.toString() }
 	})}>
 		<Image
-			source={{ uri: `http://192.168.100.57:8080/api/v1/plants/${plant.id}/images/card`}}
+			source={{ uri: `${DOMAIN}/api/v1/plants/${plant.id}/images/card`}}
 			style={styles.image}
 		/>
 		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
@@ -64,7 +57,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
+		
 	},
 	listContainer: {
 		gap: 12

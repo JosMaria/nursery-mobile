@@ -4,6 +4,7 @@ import {
 	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
 
+import { Loading } from '@/components/Loading';
 import { DOMAIN } from '@/constants/enviroment';
 import { catalogService } from '@/services/catalog';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -35,12 +36,7 @@ export default function PlantLayout() {
 		}
 	}, [isSuccess]);
 	
-	if (isPending) return (
-		<View style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 10 }}>
-			<ActivityIndicator color='#344e41' size={'large'} />
-			<Text style={{ alignSelf: 'center', fontSize: 16, fontWeight: 'semibold' }}>Cargando...</Text>
-		</View>
-	);
+	if (isPending) return <Loading />
 
 	if (error) return (
 		<View style={{}}>
