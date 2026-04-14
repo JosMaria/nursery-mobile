@@ -32,7 +32,7 @@ const MainLayout = () => {
           tabBarInactiveTintColor: '#dad7cd',
           tabBarStyle: {
             backgroundColor: '#344e41',
-            height: Platform.OS === 'android' ? insets.bottom + 40 : 'auto'
+            height: Platform.OS === 'android' ? insets.bottom + 45 : 'auto'
           }
         }}
       >

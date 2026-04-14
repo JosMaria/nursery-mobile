@@ -46,7 +46,7 @@ export default function PlantLayout() {
 	);
 
 	return (
-		<View style={{ gap: 5 }}>
+		<View style={{ gap: 5, padding: 8 }}>
 			<View style={styles.containerImage}>
 				<FlatList 
 					data={plantDetails.images_info}

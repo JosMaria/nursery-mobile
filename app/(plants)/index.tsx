@@ -57,7 +57,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 
 const styles = StyleSheet.create({
 	container: {
-		
+		padding: 8		
 	},
 	listContainer: {
 		gap: 12

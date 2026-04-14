@@ -9,7 +9,7 @@ export default function Layout() {
 			screenOptions={{
 				headerShown: true,
 				headerTitleAlign: 'center',
-				contentStyle: { backgroundColor: '#a3b18a', padding: 5 }
+				contentStyle: { backgroundColor: '#a3b18a' }
 			}}
 		>
 			<Stack.Screen 
