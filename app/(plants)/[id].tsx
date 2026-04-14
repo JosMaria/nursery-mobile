@@ -1,7 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
+} from 'react-native';
 
+import { DOMAIN } from '@/constants/enviroment';
 import { catalogService } from '@/services/catalog';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useQuery } from '@tanstack/react-query';
@@ -27,17 +30,23 @@ export default function PlantLayout() {
 		if (limit && limit > 0) {
 			const elementSelected = Math.floor(Math.random() * limit);
 			const { filename } = plantDetails.images_info[elementSelected];
-			const uri = `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${filename}`;
+			const uri = `${DOMAIN}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 			changeUriImage(uri);
 		}
 	}, [isSuccess]);
-
+	
 	if (isPending) return (
-		<Text>Pending...</Text>
+		<View style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 10 }}>
+			<ActivityIndicator color='#344e41' size={'large'} />
+			<Text style={{ alignSelf: 'center', fontSize: 16, fontWeight: 'semibold' }}>Cargando...</Text>
+		</View>
 	);
 
 	if (error) return (
-		<Text>error load Plant layout</Text>
+		<View style={{}}>
+			<ActivityIndicator color='#344e41' />
+			<Text>error load Plant layout</Text>
+		</View>
 	);
 
 	return (
@@ -56,7 +65,7 @@ export default function PlantLayout() {
 						<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} activedUri={activedUriImage} />
 					)}
 				/>
-				<Image 
+				<Image
 					source={activedUriImage ? { uri: activedUriImage } : require(defaultImagePath)}
 					defaultSource={require(defaultImagePath)}
 					resizeMode='stretch'
@@ -119,7 +128,7 @@ interface SmallImageProps {
 }
 
 const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
-	const uri = `http://192.168.100.57:8080/api/v1/plants/${plantId}/images?image_name=${filename}`;
+	const uri = `${DOMAIN}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 	return (
 		<TouchableOpacity onPress={() => changeUriImage(uri)}
 			style={{ height: 60 }}>

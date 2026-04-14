@@ -1,0 +1,1 @@
+export const DOMAIN = 'http://192.168.100.57:8080';
