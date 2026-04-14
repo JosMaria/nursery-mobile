@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Loading } from '@/components/Loading';
-import { DOMAIN } from '@/constants/enviroment';
+import { ApiConfig } from '@/constants/enviroment';
 import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
 
@@ -46,7 +46,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 		params: { id: plant.id.toString() }
 	})}>
 		<Image
-			source={{ uri: `${DOMAIN}/api/v1/plants/${plant.id}/images/card`}}
+			source={{ uri: `${ApiConfig.domain}/api/v1/plants/${plant.id}/images/card`}}
 			style={styles.image}
 		/>
 		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>

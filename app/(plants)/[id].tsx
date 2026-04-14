@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 
 import { Loading } from '@/components/Loading';
-import { DOMAIN } from '@/constants/enviroment';
+import { ApiConfig } from '@/constants/enviroment';
 import { catalogService } from '@/services/catalog';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +31,7 @@ export default function PlantLayout() {
 		if (limit && limit > 0) {
 			const elementSelected = Math.floor(Math.random() * limit);
 			const { filename } = plantDetails.images_info[elementSelected];
-			const uri = `${DOMAIN}/api/v1/plants/${plantId}/images?image_name=${filename}`;
+			const uri = `${ApiConfig.domain}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 			changeUriImage(uri);
 		}
 	}, [isSuccess]);
@@ -105,7 +105,7 @@ const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
 					height: 40, 
 					borderRadius: '50%'
 				}}>
-					<FontAwesome5 name="calendar-alt" color="black" size={24}  />
+					<FontAwesome5 name='calendar-alt' color='black' size={24}  />
 				</View>
 				<View style={{ flexDirection: 'column' }}>
 					<Text>{date.getDate().toString().padStart(2, '0')} {date.toLocaleString('es', { month: 'short' })}, {date.getFullYear()}</Text>
@@ -124,7 +124,7 @@ interface SmallImageProps {
 }
 
 const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
-	const uri = `${DOMAIN}/api/v1/plants/${plantId}/images?image_name=${filename}`;
+	const uri = `${ApiConfig.domain}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 	return (
 		<TouchableOpacity onPress={() => changeUriImage(uri)}
 			style={{ height: 60 }}>
