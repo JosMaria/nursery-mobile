@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
+import { Colors } from '@/constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function Layout() {
@@ -9,7 +10,7 @@ export default function Layout() {
 			screenOptions={{
 				headerShown: true,
 				headerTitleAlign: 'center',
-				contentStyle: { backgroundColor: '#a3b18a' }
+				contentStyle: { backgroundColor: Colors.green.light }
 			}}
 		>
 			<Stack.Screen 
@@ -28,12 +29,12 @@ export default function Layout() {
 							alignItems: 'center',
 							paddingVertical: 14,
 							paddingHorizontal: 5,
-							backgroundColor: '#344e41'
+							backgroundColor: Colors.green.darker
 						}}>
 							<TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('index')}>
-								<Ionicons name='chevron-back-outline' size={20} color='#dad7cd' />
+								<Ionicons name='chevron-back-outline' size={20} color={Colors.green.lighter} />
 							</TouchableOpacity>
-							<Text style={{ color: '#dad7cd', fontSize: 20 }}>{options.title}</Text>
+							<Text style={{ color: Colors.green.lighter, fontSize: 20, }}>{options.title}</Text>
 							<View style={{ width: 22 }}  />
 						</View>
 					)

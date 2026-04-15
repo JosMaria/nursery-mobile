@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Platform, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -23,15 +24,15 @@ const MainLayout = () => {
     <View style={{ flex: 1 }}>
       <View style={{
           height: Platform.OS === 'android' ? insets.top : 0, 
-          backgroundColor: '#344e41'
+          backgroundColor: Colors.green.darker,
         }} 
       />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: 'white',
-          tabBarInactiveTintColor: '#dad7cd',
+          tabBarInactiveTintColor: Colors.green.lighter,
           tabBarStyle: {
-            backgroundColor: '#344e41',
+            backgroundColor: Colors.green.darker,
             height: Platform.OS === 'android' ? insets.bottom + 45 : 'auto'
           }
         }}

@@ -3,6 +3,7 @@ import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react
 
 import { Loading } from '@/components/Loading';
 import { ApiConfig } from '@/constants/enviroment';
+import { Colors } from '@/constants/theme';
 import { catalogService, PlantCardResponse } from '@/services/catalog';
 import { useQuery } from '@tanstack/react-query';
 
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
 	},
 	cardContainer: {
 		width: '45%',
-		backgroundColor: '#dad7cd',
+		backgroundColor: Colors.green.lighter,
 		borderRadius: 6,
 		padding: 6
 	},
@@ -81,13 +82,13 @@ const styles = StyleSheet.create({
 	},
 	scientificName: {
 		fontSize: 12,
-		color: '#666',
+		color: 'gray',
 		fontStyle: 'italic',
 		fontWeight: 'bold'
 	},
 	price: {
 		fontSize: 14,
-		color: '#2e7d32',
+		color: Colors.green.darker,
 		fontWeight: '600'
 	},
 });

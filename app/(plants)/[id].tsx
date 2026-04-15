@@ -6,6 +6,7 @@ import {
 
 import { Loading } from '@/components/Loading';
 import { ApiConfig } from '@/constants/enviroment';
+import { Colors } from '@/constants/theme';
 import { catalogService } from '@/services/catalog';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useQuery } from '@tanstack/react-query';
@@ -40,7 +41,7 @@ export default function PlantLayout() {
 
 	if (error) return (
 		<View style={{}}>
-			<ActivityIndicator color='#344e41' />
+			<ActivityIndicator color={Colors.green.darker} />
 			<Text>error load Plant layout</Text>
 		</View>
 	);
@@ -69,7 +70,7 @@ export default function PlantLayout() {
 						flex: 1,
 						height: 'auto',
 						borderRadius: 10,
-						borderColor: '#344e41',
+						borderColor: Colors.green.darker,
 						borderWidth: 4
 					}}
 				/>
@@ -100,7 +101,7 @@ const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
 					display: 'flex', 
 					justifyContent: 'center', 
 					alignItems: 'center', 
-					backgroundColor: '#e9edc9', 
+					backgroundColor: Colors.green.lighter, 
 					width: 40, 
 					height: 40, 
 					borderRadius: '50%'
@@ -135,7 +136,7 @@ const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriIma
 				style={[{ height: '100%' }, activedUri === uri && {
 					opacity: 0.8,
 					borderRadius: 1,
-					borderColor: '#344e41',
+					borderColor: Colors.green.darker,
 					borderWidth: 3
 				}]}
 			/>

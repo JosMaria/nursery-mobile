@@ -6,7 +6,11 @@
 import { Platform } from 'react-native';
 
 export const Colors = {
-    
+  green: {
+    lighter: '#dad7cd',
+    light: '#a3b18a',
+    darker: '#344e41',
+  },
 };
 
 export const Fonts = Platform.select({
