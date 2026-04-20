@@ -3,6 +3,7 @@ import { FlatList, ImageBackground, Text, TouchableOpacity, View } from 'react-n
 import { ApiConfig } from '@/constants/enviroment';
 import { Colors } from '@/constants/theme';
 import { FontAwesome } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 
 interface ImageInfo {
 	imageId: number;
@@ -42,6 +43,20 @@ const buildImageUrl = (plantId: number, filename: string) => `${ApiConfig.domain
 
 export default function Information() {
 	const scientificName = 'Anthurium andraeanum';
+	const [selectedImageId, setSelectedImageId] = useState<ImageInfo['imageId']>();
+
+	const changeSelectedImage = (imageId: number) => {
+		if (selectedImageId !== imageId) {
+			setSelectedImageId(imageId);
+		}
+	}
+
+	useEffect(() => {
+		const selectedImageIdFromApi = imageInfos.find(imageInfo => imageInfo.isSelected);
+		if (selectedImageIdFromApi) {
+			setSelectedImageId(selectedImageIdFromApi.imageId);
+		}
+	}, []);
 
 	return (
 		<View style={{ flex: 1, padding: 8 }}>
@@ -61,15 +76,22 @@ export default function Information() {
 				numColumns={2}
 				keyExtractor={(imageInfo) => imageInfo.imageId.toString()}
 				data={imageInfos}
-				renderItem={({ item: { plantId, filename, isSelected } }) => (
+				renderItem={({ item: { plantId, filename, imageId } }) => (
 					<View style={{  }}>
 						<ImageBackground
 							source={{ uri: buildImageUrl(plantId, filename) }}
 							defaultSource={require('@/assets/images/default_image.png')}
 						 	imageStyle={{ borderRadius: 10 }} style={{ width: 160, height: 160, padding: 4 }}
 						>
-							<TouchableOpacity style={{ alignSelf: 'flex-end', backgroundColor: Colors.green.darker, padding: 4, borderRadius: 100 }} onPress={() => console.log('you pressed')}>
-								<FontAwesome name={isSelected ? 'star' : 'star-o'} size={20} color='#EBE53B' />
+							<TouchableOpacity
+								style={{
+									alignSelf: 'flex-end',
+									backgroundColor: Colors.green.darker,
+									padding: 6,
+									borderRadius: 100,
+								}}
+								onPress={() => changeSelectedImage(imageId)}>
+								<FontAwesome name={selectedImageId === imageId ? 'star' : 'star-o'} size={24} color='#EBE53B' />
 							</TouchableOpacity>
 						</ImageBackground>
 					</View>
