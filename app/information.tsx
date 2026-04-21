@@ -1,49 +1,24 @@
+import { useEffect, useState } from 'react';
 import { FlatList, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
 
+import { Loading } from '@/components/Loading';
 import { ApiConfig } from '@/constants/enviroment';
 import { Colors } from '@/constants/theme';
+import { catalogService } from '@/services/catalog';
+import { plantService } from '@/services/plant';
+import { ImageSelectionResponse } from '@/services/types';
 import { FontAwesome } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-
-interface ImageInfo {
-	imageId: number;
-	filename: string;
-	plantId: number;
-	isSelected: boolean;
-};
-
-const imageInfos: ImageInfo[] = [
-	{
-		imageId: 1,
-		filename: '1d7ba99e-e7ae-4b13-8a3c-803ecd24c15a.png',
-		plantId: 1,
-		isSelected: false,
-	},
-	{
-		imageId: 2,
-		filename: '1f4d319e-847c-4e37-8b94-1669270ca01c.png',
-		plantId: 1,
-		isSelected: false,
-	},
-	{
-		imageId: 3,
-		filename: 'eec48e90-c038-4b05-85c2-db4ed6f9932c.png',
-		plantId: 1,
-		isSelected: true,
-	},
-	{
-		imageId: 4,
-		filename: '879d4779-6706-4b60-8591-3f9bd8329364.png',
-		plantId: 1,
-		isSelected: false,
-	},
-];
+import { useQuery } from '@tanstack/react-query';
 
 const buildImageUrl = (plantId: number, filename: string) => `${ApiConfig.domain}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 
 export default function Information() {
-	const scientificName = 'Anthurium andraeanum';
-	const [selectedImageId, setSelectedImageId] = useState<ImageInfo['imageId']>();
+	const plantId = 3;
+	const [selectedImageId, setSelectedImageId] = useState<ImageSelectionResponse['image_id']>();
+	const { data: plantImages, isLoading, error, isSuccess } = useQuery({
+		queryKey: ['plantImages'],
+		queryFn: () => plantService.fetchImagesToSelection(plantId),
+	});
 
 	const changeSelectedImage = (imageId: number) => {
 		if (selectedImageId !== imageId) {
@@ -52,17 +27,18 @@ export default function Information() {
 	}
 
 	useEffect(() => {
-		const selectedImageIdFromApi = imageInfos.find(imageInfo => imageInfo.isSelected);
-		if (selectedImageIdFromApi) {
-			setSelectedImageId(selectedImageIdFromApi.imageId);
+		if (isSuccess) {
+			const selectedImage = plantImages.find(({ is_selected }) => is_selected);
+			setSelectedImageId(selectedImage?.image_id);
 		}
-	}, []);
+	}, [isSuccess]);
+
+	if (isLoading) return <Loading />
+
+	if (error) return <View><Text>{error.message}</Text></View>
 
 	return (
 		<View style={{ flex: 1, padding: 8 }}>
-			<Text style={{ fontWeight: '700' }}>Nombre cientifico:{' '}
-				<Text style={{ fontStyle: 'italic', fontWeight: '400' }}>{scientificName}</Text>
-			</Text>
 			<FlatList
 				contentContainerStyle={{
 					flex: 1,
@@ -74,32 +50,62 @@ export default function Information() {
 					columnGap: 10,
 				}}
 				numColumns={2}
-				keyExtractor={(imageInfo) => imageInfo.imageId.toString()}
-				data={imageInfos}
-				renderItem={({ item: { plantId, filename, imageId } }) => (
-					<View style={{  }}>
-						<ImageBackground
-							source={{ uri: buildImageUrl(plantId, filename) }}
-							defaultSource={require('@/assets/images/default_image.png')}
-						 	imageStyle={{ borderRadius: 10 }} style={{ width: 160, height: 160, padding: 4 }}
-						>
-							<TouchableOpacity
-								style={{
-									alignSelf: 'flex-end',
-									backgroundColor: Colors.green.darker,
-									padding: 6,
-									borderRadius: 100,
-								}}
-								onPress={() => changeSelectedImage(imageId)}>
-								<FontAwesome name={selectedImageId === imageId ? 'star' : 'star-o'} size={24} color='#EBE53B' />
-							</TouchableOpacity>
-						</ImageBackground>
-					</View>
+				keyExtractor={({ image_id: imageId }) => imageId.toString()}
+				data={plantImages}
+				renderItem={({ item: { filename, image_id: imageId } }) => (
+					<ImageToSelect
+						imageUrl={buildImageUrl(plantId, filename)}
+						imageId={imageId}
+						isSelected={selectedImageId === imageId}
+						changeSelectedImage={changeSelectedImage}
+					/>
 				)}
 			/>
-			<TouchableOpacity style={{ borderRadius: 4, backgroundColor: Colors.green.darker, paddingHorizontal: 14, paddingVertical: 8, alignSelf: 'center' }}>
+			<TouchableOpacity
+				style={{
+					alignSelf: 'center',
+					borderRadius: 4,
+					backgroundColor: Colors.green.darker,
+					paddingHorizontal: 14,
+					paddingVertical: 8,
+				}}
+				onPress={() => {
+					if (selectedImageId) {
+						console.log('ha cambiado supiuestamente')
+						catalogService.changeSelectedImage(1, selectedImageId)
+					}
+				}}
+			>
 				<Text style={{ color: Colors.green.lighter, fontSize: 16, fontWeight: '500' }}>Guardar Cambios</Text>
 			</TouchableOpacity>
 		</View>
 	);
 }
+
+interface ImageToSelectProps {
+	imageUrl: string;
+	imageId: number;
+	isSelected: boolean;
+	changeSelectedImage: (imageId: number) => void;
+};
+
+const ImageToSelect: React.FC<ImageToSelectProps> = ({ imageUrl, imageId, isSelected, changeSelectedImage }) => (
+	<ImageBackground
+		source={{ uri: imageUrl }}
+		defaultSource={require('@/assets/images/default_image.png')}
+		imageStyle={{ borderRadius: 10 }}
+		style={{ width: 160, height: 160, padding: 4 }}
+	>
+		<TouchableOpacity
+			style={{
+				alignSelf: 'flex-end',
+				backgroundColor: Colors.green.darker,
+				padding: 6,
+				borderRadius: 100,
+			}}
+			onPress={() => changeSelectedImage(imageId)}
+		>
+			<FontAwesome name={isSelected ? 'star' : 'star-o'} size={24} color='#EBE53B' />
+		</TouchableOpacity>
+	</ImageBackground>
+);
