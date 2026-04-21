@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { FlatList, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import {
+	FlatList, ImageBackground, Text, TouchableOpacity, View
+} from 'react-native';
 
 import { Loading } from '@/components/Loading';
 import { ApiConfig } from '@/constants/enviroment';
 import { Colors } from '@/constants/theme';
-import { catalogService } from '@/services/catalog';
 import { plantService } from '@/services/plant';
-import { ImageSelectionResponse } from '@/services/types';
 import { FontAwesome } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 
@@ -14,22 +14,30 @@ const buildImageUrl = (plantId: number, filename: string) => `${ApiConfig.domain
 
 export default function Information() {
 	const plantId = 3;
-	const [selectedImageId, setSelectedImageId] = useState<ImageSelectionResponse['image_id']>();
+	const [valuesImageId, setValuesImageId] = useState<{ initialValue: number; currentValue: number }>({ initialValue: 0, currentValue: 0 });
+
 	const { data: plantImages, isLoading, error, isSuccess } = useQuery({
 		queryKey: ['plantImages'],
 		queryFn: () => plantService.fetchImagesToSelection(plantId),
 	});
 
-	const changeSelectedImage = (imageId: number) => {
-		if (selectedImageId !== imageId) {
-			setSelectedImageId(imageId);
+	const changeSelectedImage = (imageIdToSelect: number) => {
+		if (valuesImageId.currentValue !== imageIdToSelect) {
+			setValuesImageId(prev => ({ ...prev, currentValue: imageIdToSelect }));
 		}
 	}
+
+	const canChangeSelectedImage = () => valuesImageId.initialValue !== valuesImageId.currentValue;
 
 	useEffect(() => {
 		if (isSuccess) {
 			const selectedImage = plantImages.find(({ is_selected }) => is_selected);
-			setSelectedImageId(selectedImage?.image_id);
+			if (selectedImage) {
+				setValuesImageId({
+					initialValue: selectedImage.image_id,
+					currentValue: selectedImage.image_id,
+				});
+			}
 		}
 	}, [isSuccess]);
 
@@ -56,8 +64,8 @@ export default function Information() {
 					<ImageToSelect
 						imageUrl={buildImageUrl(plantId, filename)}
 						imageId={imageId}
-						isSelected={selectedImageId === imageId}
-						changeSelectedImage={changeSelectedImage}
+						isSelected={valuesImageId.currentValue === imageId}
+						changeSelectedImage={() => changeSelectedImage(imageId)}
 					/>
 				)}
 			/>
@@ -66,17 +74,27 @@ export default function Information() {
 					alignSelf: 'center',
 					borderRadius: 4,
 					backgroundColor: Colors.green.darker,
-					paddingHorizontal: 14,
+					width: 100,
 					paddingVertical: 8,
 				}}
+				disabled={!canChangeSelectedImage()}
 				onPress={() => {
-					if (selectedImageId) {
-						console.log('ha cambiado supiuestamente')
-						catalogService.changeSelectedImage(1, selectedImageId)
-					}
+					console.log("it's enabled")
 				}}
 			>
-				<Text style={{ color: Colors.green.lighter, fontSize: 16, fontWeight: '500' }}>Guardar Cambios</Text>
+				{/* <ActivityIndicator color={Colors.green.lighter} /> */}
+
+				<Text
+					style={{
+						color: Colors.green.lighter,
+						fontSize: 16,
+						fontWeight: '500',
+						textAlign: 'center',
+						opacity: canChangeSelectedImage() ? 1 : 0.5,
+					}}
+				>
+					Guardar
+				</Text>
 			</TouchableOpacity>
 		</View>
 	);
