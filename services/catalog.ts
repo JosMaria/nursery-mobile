@@ -1,14 +1,15 @@
-import { api } from './api';
+import { axiosInstance } from './api';
+import { PaginatedResult } from './types';
 
 export const catalogService = {
-    fetchPlantCards: async () => {
-        const { data } = await api.get<PlantCardResponse[]>('/plants/cards');
+    getPlantCards: async (page = 0, size = 8) => {
+        const { data } = await axiosInstance.get<PaginatedResult>(`/plants/cards?page=${page}&size=${size}`);
         return data;
     },
     fetchPlantDetailsById: async (plantId: number) => {
-        const { data } = await api.get<PlantDetails>(`/plants/${plantId}/details`);
+        const { data } = await axiosInstance.get<PlantDetails>(`/plants/${plantId}/details`);
         return data;
-    }
+    },
 };
 
 export type PlantDetails = {
@@ -34,35 +35,5 @@ export type PlantDetails = {
     images_info: {
         filename: string;
         storage_path: string;
-    }[];
-}
-
-export interface PlantCardResponse {
-    id: number;
-    scientific_name: string;
-    common_name: string;
-    price: number;
-    url: string;
-};
-
-export interface PlantDetailsResponse {
-    id: number;
-    scientific_name: string;
-    price: number;
-    updated_at: string;
-    taxonomy: {
-        division: string;
-        class: string;
-        order: string;
-        family: string;
-        genus: string;
-        species: string;
-    }
-    urls: string[];
-    common_names: {
-        id: number,
-        name: string;
-        country: string;
-        place: string
     }[];
 }

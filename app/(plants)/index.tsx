@@ -2,17 +2,18 @@ import { router } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Loading } from '@/components/Loading';
-import { ApiConfig } from '@/constants/enviroment';
 import { Colors } from '@/constants/theme';
-import { catalogService, PlantCardResponse } from '@/services/catalog';
+import { axiosInstance } from '@/services/api';
+import { catalogService } from '@/services/catalog';
+import { PlantCardResponse } from '@/services/types';
 import { useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
 	const { data: plantCards, isPending, error } = useQuery({
     queryKey: ['plantCards'],
-    queryFn: () => catalogService.fetchPlantCards()
+    queryFn: () => catalogService.getPlantCards()
   });
-	
+
 	if (isPending) return <Loading />
 
 	if (error) return (
@@ -24,9 +25,9 @@ export default function IndexScreen() {
   );
 
 	return (
-		<View style={[styles.container]}>  
+		<View style={[styles.container]}>
 			<FlatList
-				data={plantCards}
+				data={plantCards.content}
 				keyExtractor={(plantCard) => plantCard.id.toString()}
 				numColumns={2}
 				columnWrapperStyle={{ justifyContent: 'space-evenly' }}
@@ -41,14 +42,15 @@ interface PlantCardProps {
 	plant: PlantCardResponse
 }
 
-const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
+const PlantCard = ({ plant }: PlantCardProps) => (
 	<TouchableOpacity style={styles.cardContainer} onPress={() => router.push({
 		pathname: '/[id]',
 		params: { id: plant.id.toString() }
 	})}>
 		<Image
-			source={{ uri: `${ApiConfig.domain}/api/v1/plants/${plant.id}/images/card`}}
+			source={{ uri: `${axiosInstance.defaults.baseURL}/plants/${plant.id}/images/selected`}}
 			style={styles.image}
+			defaultSource={require('@/assets/images/default_image.png')}
 		/>
 		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
 		<Text numberOfLines={1} style={styles.scientificName}>{plant.scientific_name}</Text>
@@ -59,36 +61,36 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant }) => (
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 8		
+		padding: 8,
 	},
 	listContainer: {
-		gap: 12
+		gap: 12,
 	},
 	cardContainer: {
 		width: '45%',
 		backgroundColor: Colors.green.lighter,
 		borderRadius: 6,
-		padding: 6
+		padding: 6,
 	},
 	image: {
 		width: '100%',
 		height: 150,
 		borderRadius: 6,
-		marginBottom: 6
+		marginBottom: 6,
 	},
 	commonName: {
 		fontSize: 14,
-		fontWeight: 'bold'
+		fontWeight: 'bold',
 	},
 	scientificName: {
 		fontSize: 12,
 		color: 'gray',
 		fontStyle: 'italic',
-		fontWeight: 'bold'
+		fontWeight: 'bold',
 	},
 	price: {
 		fontSize: 14,
 		color: Colors.green.darker,
-		fontWeight: '600'
+		fontWeight: '600',
 	},
 });
