@@ -5,8 +5,8 @@ import {
 } from 'react-native';
 
 import { Loading } from '@/components/Loading';
-import { ApiConfig } from '@/constants/enviroment';
 import { Colors } from '@/constants/theme';
+import { axiosInstance } from '@/services/api';
 import { catalogService } from '@/services/catalog';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useQuery } from '@tanstack/react-query';
@@ -32,7 +32,7 @@ export default function PlantLayout() {
 		if (limit && limit > 0) {
 			const elementSelected = Math.floor(Math.random() * limit);
 			const { filename } = plantDetails.images_info[elementSelected];
-			const uri = `${ApiConfig.domain}/api/v1/plants/${plantId}/images?image_name=${filename}`;
+			const uri = `${axiosInstance.defaults.baseURL}/api/v1/plants/${plantId}/images?image_name=${filename}`;
 			changeUriImage(uri);
 		}
 	}, [isSuccess]);
@@ -125,7 +125,7 @@ interface SmallImageProps {
 }
 
 const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
-	const uri = `${ApiConfig.domain}/api/v1/plants/${plantId}/images?image_name=${filename}`;
+	const uri = `${axiosInstance.defaults.baseURL}/plants/${plantId}/images?image_name=${filename}`;
 	return (
 		<TouchableOpacity onPress={() => changeUriImage(uri)}
 			style={{ height: 60 }}>

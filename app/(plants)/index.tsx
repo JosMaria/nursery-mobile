@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Loading } from '@/components/Loading';
 import { Colors } from '@/constants/theme';
 import { axiosInstance } from '@/services/api';
 import { catalogService } from '@/services/catalog';
 import { PlantCardResponse } from '@/services/types';
+import { FontAwesome } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
@@ -47,11 +48,26 @@ const PlantCard = ({ plant }: PlantCardProps) => (
 		pathname: '/[id]',
 		params: { id: plant.id.toString() }
 	})}>
-		<Image
-			source={{ uri: `${axiosInstance.defaults.baseURL}/plants/${plant.id}/images/selected`}}
-			style={styles.image}
+		<ImageBackground
+			source={{ uri: `${axiosInstance.defaults.baseURL}/plants/${plant.id}/images/selected` }}
 			defaultSource={require('@/assets/images/default_image.png')}
-		/>
+			style={styles.image}
+		>
+			{plant.is_favorite && (
+				<FontAwesome
+					name='star'
+					size={16}
+					color='#EBE53B'
+					style={{
+						backgroundColor: Colors.green.darker,
+						alignSelf: 'flex-end',
+						borderRadius: 50,
+						padding: 4,
+						margin: 2,
+					}}
+				/>
+			)}
+		</ImageBackground>
 		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
 		<Text numberOfLines={1} style={styles.scientificName}>{plant.scientific_name}</Text>
 		<Text style={styles.price}>Bs. {plant.price}</Text>
