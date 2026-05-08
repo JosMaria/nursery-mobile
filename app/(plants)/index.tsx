@@ -7,6 +7,7 @@ import { axiosInstance } from '@/services/api';
 import { plantService } from '@/services/plant';
 import { PlantCardResponse } from '@/types/plantsTypes';
 import { FontAwesome } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
@@ -35,6 +36,25 @@ export default function IndexScreen() {
 				contentContainerStyle={styles.listContainer}
 				numColumns={2}
 			/>
+			<View style={styles.pageButtonsContainer}>
+				<TouchableOpacity onPress={() => console.log('first page')}>
+					<MaterialIcons style={styles.pageButton} name='first-page' size={20} />
+				</TouchableOpacity>
+				
+				<TouchableOpacity onPress={() => console.log('before')}>
+					<MaterialIcons style={styles.pageButton} name='navigate-before' size={20} />
+				</TouchableOpacity>
+
+				<Text style={{ fontSize: 20 }}>6</Text>
+
+				<TouchableOpacity onPress={() => console.log('after')}>
+					<MaterialIcons style={styles.pageButton} name='navigate-next' size={20} />
+				</TouchableOpacity>
+
+				<TouchableOpacity onPress={() => console.log('last')}>
+					<MaterialIcons style={styles.pageButton} name='last-page' size={20} />
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 }
@@ -83,6 +103,7 @@ const PlantCard = ({ plantCard }: PlantCardProps) => (
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		gap: '.5rem',
 		padding: 8,
 	},
 	listContainer: {
@@ -114,5 +135,19 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		color: Colors.green.darker,
 		fontWeight: '600',
+	},
+	pageButtonsContainer: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: '1rem',
+	},
+	pageButton: {
+		backgroundColor: Colors.green.darker,
+		color: Colors.green.lighter,
+		paddingVertical: 4,
+		paddingHorizontal: 6,
+		borderRadius: 5,
 	},
 });
