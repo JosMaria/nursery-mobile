@@ -4,15 +4,15 @@ import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } f
 import { Loading } from '@/components/Loading';
 import { Colors } from '@/constants/theme';
 import { axiosInstance } from '@/services/api';
-import { catalogService } from '@/services/catalog';
-import { PlantCardResponse } from '@/services/types';
+import { plantService } from '@/services/plant';
+import { PlantCardResponse } from '@/types/plantsTypes';
 import { FontAwesome } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
-	const { data: plantCards, isPending, error } = useQuery({
+	const { data: pagePlantCards, isPending, error } = useQuery({
     queryKey: ['plantCards'],
-    queryFn: () => catalogService.getPlantCards()
+    queryFn: () => plantService.getPaginatedPlantCards(),
   });
 
 	if (isPending) return <Loading />
@@ -26,34 +26,40 @@ export default function IndexScreen() {
   );
 
 	return (
-		<View style={[styles.container]}>
+		<View style={styles.container}>
 			<FlatList
-				data={plantCards.content}
-				keyExtractor={(plantCard) => plantCard.id.toString()}
-				numColumns={2}
+				data={pagePlantCards.content}
+				keyExtractor={plantCard => plantCard.id.toString()}
+				renderItem={({ item: plantCardResponse }) => <PlantCard plantCard={plantCardResponse} />}
 				columnWrapperStyle={{ justifyContent: 'space-evenly' }}
 				contentContainerStyle={styles.listContainer}
-				renderItem={({ item: plantCardResponse }) => <PlantCard plant={plantCardResponse} />}
+				numColumns={2}
 			/>
 		</View>
 	);
 }
 
 interface PlantCardProps {
-	plant: PlantCardResponse
-}
+	plantCard: PlantCardResponse;
+};
 
-const PlantCard = ({ plant }: PlantCardProps) => (
-	<TouchableOpacity style={styles.cardContainer} onPress={() => router.push({
-		pathname: '/[id]',
-		params: { id: plant.id.toString() }
-	})}>
+const urlSelectedImage = (plantId: number, selectedImageId: number) =>
+	`${axiosInstance.defaults.baseURL}/plants/${plantId}/images/${selectedImageId}`;
+
+const PlantCard = ({ plantCard }: PlantCardProps) => (
+	<TouchableOpacity
+		style={styles.cardContainer}
+		onPress={() => router.push({
+			pathname: '/[id]',
+			params: { id: plantCard.id.toString() },
+		})}
+	>
 		<ImageBackground
-			source={{ uri: `${axiosInstance.defaults.baseURL}/plants/${plant.id}/images/selected` }}
+			source={{ uri: urlSelectedImage(plantCard.id, plantCard.selected_image_id) }}
 			defaultSource={require('@/assets/images/default_image.png')}
 			style={styles.image}
 		>
-			{plant.is_favorite && (
+			{plantCard.is_favorite && (
 				<FontAwesome
 					name='star'
 					size={16}
@@ -68,9 +74,9 @@ const PlantCard = ({ plant }: PlantCardProps) => (
 				/>
 			)}
 		</ImageBackground>
-		<Text numberOfLines={1} style={styles.commonName}>{plant.common_name}</Text>
-		<Text numberOfLines={1} style={styles.scientificName}>{plant.scientific_name}</Text>
-		<Text style={styles.price}>Bs. {plant.price}</Text>
+		<Text numberOfLines={1} style={styles.commonName}>{plantCard.common_name}</Text>
+		<Text numberOfLines={1} style={styles.scientificName}>{plantCard.scientific_name}</Text>
+		<Text style={styles.price}>Bs. {plantCard.price}</Text>
 	</TouchableOpacity>
 );
 
