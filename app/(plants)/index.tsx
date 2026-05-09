@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Loading } from '@/components/Loading';
@@ -8,13 +9,21 @@ import { plantService } from '@/services/plant';
 import { PlantCardResponse } from '@/types/plantsTypes';
 import { FontAwesome } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 export default function IndexScreen() {
-	const { data: pagePlantCards, isPending, error } = useQuery({
-    queryKey: ['plantCards'],
-    queryFn: () => plantService.getPaginatedPlantCards(),
+	const [page, setPage] = useState(0);
+
+	const { data: pagePlantCards, isPending, error, isPlaceholderData } = useQuery({
+    queryKey: ['cards', page],
+    queryFn: () => plantService.getPaginatedPlantCards(page, 3),
+		placeholderData: keepPreviousData,
+		staleTime: 1_000 * 60,
+		refetchOnWindowFocus: false,
   });
+
+	const hasMorePages = (totalPages: number) => totalPages > 1 && page < totalPages - 1;
+	const isDisableNextPage = (totalPages: number) => isPlaceholderData || !hasMorePages(totalPages);
 
 	if (isPending) return <Loading />
 
@@ -37,21 +46,45 @@ export default function IndexScreen() {
 				numColumns={2}
 			/>
 			<View style={styles.pageButtonsContainer}>
-				<TouchableOpacity onPress={() => console.log('first page')}>
+				<TouchableOpacity
+					style={[page === 0 && styles.disable]}
+					disabled={page===0}
+					onPress={() => setPage(0)}
+				>
 					<MaterialIcons style={styles.pageButton} name='first-page' size={20} />
 				</TouchableOpacity>
 				
-				<TouchableOpacity onPress={() => console.log('before')}>
+				<TouchableOpacity
+					style={[page === 0 && styles.disable]}
+					disabled={page===0}
+					onPress={() => setPage(oldPageNumber => Math.max(oldPageNumber - 1, 0))}
+				>
 					<MaterialIcons style={styles.pageButton} name='navigate-before' size={20} />
 				</TouchableOpacity>
 
-				<Text style={{ fontSize: 20 }}>6</Text>
+				<Text style={{ fontSize: 20 }}>{page}</Text>
 
-				<TouchableOpacity onPress={() => console.log('after')}>
+				<TouchableOpacity
+					style={[isDisableNextPage(pagePlantCards.total_pages) && styles.disable]}
+					disabled={isDisableNextPage(pagePlantCards.total_pages)}
+					onPress={() => {
+						if (!isDisableNextPage(pagePlantCards.total_pages))
+							setPage(old => old + 1)
+						}
+					}
+				>
 					<MaterialIcons style={styles.pageButton} name='navigate-next' size={20} />
 				</TouchableOpacity>
 
-				<TouchableOpacity onPress={() => console.log('last')}>
+				<TouchableOpacity
+					style={[isDisableNextPage(pagePlantCards.total_pages) && styles.disable]}
+					disabled={isDisableNextPage(pagePlantCards.total_pages)}
+					onPress={() => {
+						if (!isDisableNextPage(pagePlantCards.total_pages)) {
+							setPage(pagePlantCards.total_pages -1)
+						}
+					}}
+				>
 					<MaterialIcons style={styles.pageButton} name='last-page' size={20} />
 				</TouchableOpacity>
 			</View>
@@ -150,4 +183,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 6,
 		borderRadius: 5,
 	},
+	disable: {
+		opacity: .5,
+	}
 });
