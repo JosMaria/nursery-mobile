@@ -136,7 +136,7 @@ const PlantCard = ({ plantCard }: PlantCardProps) => (
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		gap: '.5rem',
+		gap: 10,
 		padding: 8,
 	},
 	listContainer: {
@@ -174,7 +174,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: '1rem',
+		gap: 10,
+	
+		borderColor: Colors.green.darker,
+		borderTopWidth: StyleSheet.hairlineWidth,
+		paddingTop: 4
 	},
 	pageButton: {
 		backgroundColor: Colors.green.darker,

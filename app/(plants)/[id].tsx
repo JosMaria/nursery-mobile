@@ -13,27 +13,33 @@ import { useQuery } from '@tanstack/react-query';
 
 const defaultImagePath: string = '@/assets/images/default_image.png';
 
+const parsedPlantId = (id: string | string[]) => {
+	const plantId = Array.isArray(id) ? id[0] : id;
+	return Number.parseInt(plantId);
+}
+
+const obtainUri = (plantId: number, imageId: number) => `${axiosInstance.defaults.baseURL}/plants/${plantId}/images/${imageId}`;
+
+const INVALID_IMAGE_ID = 0;
+
 export default function PlantLayout() {
 	const { id } = useLocalSearchParams();
-	const plantId = obtainPlantId(id);
-	const [activedUriImage, setActivedUriImage] = useState<string | undefined>();
+	const plantId = parsedPlantId(id);
+	
+	const [selectedImageId, setSelectedImageId] = useState(INVALID_IMAGE_ID);
 
 	const { data: plantDetails, isPending, error, isSuccess } = useQuery({
-		queryKey: ['plantDetails'],
-		queryFn: () => catalogService.fetchPlantDetailsById(plantId)
+		queryKey: ['plantDetails', plantId],
+		queryFn: () => catalogService.getPlantDetailsById(plantId),
+		refetchOnWindowFocus: false,
 	});
 
-	const changeUriImage = (uriImage: string) => {
-		setActivedUriImage(uriImage);
-	}
-
 	useEffect(() => {
-		const limit = plantDetails?.images_info.length;
-		if (limit && limit > 0) {
-			const elementSelected = Math.floor(Math.random() * limit);
-			const { filename } = plantDetails.images_info[elementSelected];
-			const uri = `${axiosInstance.defaults.baseURL}/api/v1/plants/${plantId}/images?image_name=${filename}`;
-			changeUriImage(uri);
+		if (isSuccess) {
+			const firstImageId = plantDetails.image_ids.length === 0
+				? INVALID_IMAGE_ID 
+				: plantDetails.image_ids[0];
+			setSelectedImageId(firstImageId);
 		}
 	}, [isSuccess]);
 	
@@ -50,30 +56,24 @@ export default function PlantLayout() {
 		<View style={{ gap: 5, padding: 8 }}>
 			<View style={styles.containerImage}>
 				<FlatList 
-					data={plantDetails.images_info}
+					data={plantDetails.image_ids}
 					style={{ maxWidth: 60 }}
-					keyExtractor={(imageInfo) => imageInfo.filename} 
+					keyExtractor={image_id => image_id.toString()} 
 					contentContainerStyle={{
-						justifyContent: 'center',					
+						justifyContent: 'center',
 						gap: 5,
 						height: '100%',
 					}}
-					renderItem={({ item: image_info }) => (
-						<SmallImage plantId={plantId} filename={image_info.filename} changeUriImage={changeUriImage} activedUri={activedUriImage} />
+					renderItem={({ item: imageId }) => (
+						<SmallImage
+							plantId={plantId}
+							imageId={imageId}
+							changeImage={() => setSelectedImageId(imageId)}
+							isActive={selectedImageId === imageId}
+						/>
 					)}
 				/>
-				<Image
-					source={activedUriImage ? { uri: activedUriImage } : require(defaultImagePath)}
-					defaultSource={require(defaultImagePath)}
-					resizeMode='stretch'
-					style={{
-						flex: 1,
-						height: 'auto',
-						borderRadius: 10,
-						borderColor: Colors.green.darker,
-						borderWidth: 4
-					}}
-				/>
+				<MainImage plantId={plantId} imageId={selectedImageId} />
 			</View>
 			<View style={{ backgroundColor: 'white' }}>
 				<SectionDate updatedAt={plantDetails.updated_at} />
@@ -81,6 +81,30 @@ export default function PlantLayout() {
 		</View>
 	);
 }
+
+interface MainImageProps {
+	plantId: number;
+	imageId: number;
+}
+
+const MainImage = ({ plantId, imageId }: MainImageProps) => (
+	<Image
+		source={imageId ? { uri: obtainUri(plantId, imageId) } : require(defaultImagePath)}
+		defaultSource={require(defaultImagePath)}
+		resizeMode='stretch'
+		style={mainImageStyle.image}
+	/>
+);
+
+const mainImageStyle = StyleSheet.create({
+	image: {
+		flex: 1,
+		height: 'auto',
+		borderRadius: 4,
+		borderColor: Colors.green.darker,
+		borderWidth: 4,
+	} 
+});
 
 interface SectionDateProps {
 	updatedAt: string;
@@ -106,7 +130,7 @@ const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
 					height: 40, 
 					borderRadius: '50%'
 				}}>
-					<FontAwesome5 name='calendar-alt' color='black' size={24}  />
+					<FontAwesome5 name='calendar-alt' color='black' size={24} />
 				</View>
 				<View style={{ flexDirection: 'column' }}>
 					<Text>{date.getDate().toString().padStart(2, '0')} {date.toLocaleString('es', { month: 'short' })}, {date.getFullYear()}</Text>
@@ -119,35 +143,41 @@ const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
 
 interface SmallImageProps {
 	plantId: number;
-	filename: string;
-	changeUriImage: (uri: string) => void;
-	activedUri: string | undefined;
+	imageId: number;
+	isActive: boolean
+	changeImage: () => void;
 }
 
-const SmallImage: React.FC<SmallImageProps> = ({ plantId, filename, changeUriImage, activedUri }) => {
-	const uri = `${axiosInstance.defaults.baseURL}/plants/${plantId}/images?image_name=${filename}`;
+const SmallImage = ({ plantId, imageId, isActive, changeImage }: SmallImageProps) => {
 	return (
-		<TouchableOpacity onPress={() => changeUriImage(uri)}
-			style={{ height: 60 }}>
+		<TouchableOpacity
+			style={smallImageStyle.container}
+			onPress={() => changeImage()}
+		>
 			<Image 
-				source={{ uri }}
+				source={{ uri: obtainUri(plantId, imageId) }}
 				defaultSource={require(defaultImagePath)}
 				resizeMode='stretch'
-				style={[{ height: '100%' }, activedUri === uri && {
-					opacity: 0.8,
-					borderRadius: 1,
-					borderColor: Colors.green.darker,
-					borderWidth: 3
-				}]}
+				style={[smallImageStyle.image, isActive && smallImageStyle.activedImage]}
 			/>
 		</TouchableOpacity>
 	);
 }
 
-function obtainPlantId(id: string | string[]) {
-	const plantId = Array.isArray(id) ? id[0] : id;
-	return Number.parseInt(plantId);
-}
+const smallImageStyle = StyleSheet.create({
+	container: {
+		height: 60,
+	},
+	image: {
+		height: '100%',
+	},
+	activedImage: {
+		opacity: .6,
+		borderRadius: 1,
+		borderColor: Colors.green.darker,
+		borderWidth: 3,
+	},
+});
 
 const styles = StyleSheet.create({
 	containerImage: {
