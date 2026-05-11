@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import {
-	ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View
+	FlatList, Image, StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
 
 import { Loading } from '@/components/Loading';
@@ -22,41 +22,77 @@ const obtainUri = (plantId: number, imageId: number) => `${axiosInstance.default
 
 const INVALID_IMAGE_ID = 0;
 
+interface SelectedImageContextType {
+	plantId: number;
+	imageId: number;
+	changeImageId: (newImageId: number) => void;
+}
+
+const SelectedImageContext = createContext({} as SelectedImageContextType);
+
+interface SelectedImageProviderProps {
+	children: ReactNode;
+	plantId: number;
+	imageId: number;
+}
+
+const SelectedImageProvider = ({ plantId, imageId, children }: SelectedImageProviderProps) => {
+	const [selectedImageId, setSelectedImageId] = useState(imageId);
+
+	const value: SelectedImageContextType = {
+		plantId,
+		imageId: selectedImageId,
+		changeImageId: (newSelectedImageId: number) => setSelectedImageId(newSelectedImageId),
+	}
+
+	return (
+		<SelectedImageContext.Provider value={value}>
+			{children}
+		</SelectedImageContext.Provider>
+	);
+}
+
 export default function PlantLayout() {
 	const { id } = useLocalSearchParams();
 	const plantId = parsedPlantId(id);
-	
-	const [selectedImageId, setSelectedImageId] = useState(INVALID_IMAGE_ID);
 
 	const { data: plantDetails, isPending, error, isSuccess } = useQuery({
 		queryKey: ['plantDetails', plantId],
 		queryFn: () => catalogService.getPlantDetailsById(plantId),
-		refetchOnWindowFocus: false,
 	});
 
-	useEffect(() => {
-		if (isSuccess) {
-			const firstImageId = plantDetails.image_ids.length === 0
-				? INVALID_IMAGE_ID 
-				: plantDetails.image_ids[0];
-			setSelectedImageId(firstImageId);
-		}
-	}, [isSuccess]);
-	
-	if (isPending) return <Loading />
-
-	if (error) return (
-		<View style={{}}>
-			<ActivityIndicator color={Colors.green.darker} />
-			<Text>error load Plant layout</Text>
+	return (
+		<View style={plantLayoutStyles.container}>
+			{isPending && <Loading />}
+			{error && (
+				<View>
+					<Text>error obtain plant details used react query</Text>
+				</View>
+			)}
+			{isSuccess && (
+				<View style={{ gap: 5 }}>
+					<Images plantId={plantId} imageIds={plantDetails.image_ids} />
+					<View style={{ backgroundColor: 'white' }}>
+						<SectionDate updatedAt={plantDetails.updated_at} />
+					</View>
+				</View>
+			)}
 		</View>
 	);
+}
 
+interface ImagesProps {
+	plantId: number;
+	imageIds: number[];
+}
+
+const Images = ({ plantId, imageIds }: ImagesProps) => {
+	const currentSelectedImageId = imageIds.length === 0 ? 0 : imageIds[0];
 	return (
-		<View style={{ gap: 5, padding: 8 }}>
-			<View style={styles.containerImage}>
-				<FlatList 
-					data={plantDetails.image_ids}
+		<View style={imagesStyles.containerImage}>
+			<SelectedImageProvider plantId={plantId} imageId={currentSelectedImageId}>
+				<FlatList
+					data={imageIds}
 					style={{ maxWidth: 60 }}
 					keyExtractor={image_id => image_id.toString()} 
 					contentContainerStyle={{
@@ -65,36 +101,41 @@ export default function PlantLayout() {
 						height: '100%',
 					}}
 					renderItem={({ item: imageId }) => (
-						<SmallImage
-							plantId={plantId}
-							imageId={imageId}
-							changeImage={() => setSelectedImageId(imageId)}
-							isActive={selectedImageId === imageId}
-						/>
+						<SmallImage imageId={imageId} />
 					)}
-				/>
-				<MainImage plantId={plantId} imageId={selectedImageId} />
-			</View>
-			<View style={{ backgroundColor: 'white' }}>
-				<SectionDate updatedAt={plantDetails.updated_at} />
-			</View>
+					/>
+				<MainImage />
+			</SelectedImageProvider>
 		</View>
 	);
 }
 
-interface MainImageProps {
-	plantId: number;
-	imageId: number;
-}
+const imagesStyles = StyleSheet.create({
+	containerImage: {
+		display: 'flex',
+		flexDirection: 'row',
+		gap: 10,
+		height: 280
+	}
+});
 
-const MainImage = ({ plantId, imageId }: MainImageProps) => (
-	<Image
-		source={imageId ? { uri: obtainUri(plantId, imageId) } : require(defaultImagePath)}
-		defaultSource={require(defaultImagePath)}
-		resizeMode='stretch'
-		style={mainImageStyle.image}
-	/>
-);
+const plantLayoutStyles = StyleSheet.create({
+	container: {
+		padding: 8,
+	}
+});
+
+const MainImage = () => {
+	const { imageId, plantId } = useContext(SelectedImageContext);
+	return (
+		<Image
+			source={imageId ? { uri: obtainUri(plantId, imageId) } : require(defaultImagePath)}
+			defaultSource={require(defaultImagePath)}
+			resizeMode='stretch'
+			style={mainImageStyle.image}
+		/>
+	);
+}
 
 const mainImageStyle = StyleSheet.create({
 	image: {
@@ -103,7 +144,7 @@ const mainImageStyle = StyleSheet.create({
 		borderRadius: 4,
 		borderColor: Colors.green.darker,
 		borderWidth: 4,
-	} 
+	},
 });
 
 interface SectionDateProps {
@@ -142,19 +183,16 @@ const SectionDate: React.FC<SectionDateProps> = ({ updatedAt }) => {
 }
 
 interface SmallImageProps {
-	plantId: number;
 	imageId: number;
-	isActive: boolean
-	changeImage: () => void;
 }
 
-const SmallImage = ({ plantId, imageId, isActive, changeImage }: SmallImageProps) => {
+const SmallImage = ({ imageId }: SmallImageProps) => {
+	const { plantId, imageId: selectedImageId, changeImageId } = useContext(SelectedImageContext);
+	const isActive = selectedImageId === imageId;
+
 	return (
-		<TouchableOpacity
-			style={smallImageStyle.container}
-			onPress={() => changeImage()}
-		>
-			<Image 
+		<TouchableOpacity style={smallImageStyle.container} onPress={() => changeImageId(imageId)}>
+			<Image
 				source={{ uri: obtainUri(plantId, imageId) }}
 				defaultSource={require(defaultImagePath)}
 				resizeMode='stretch'
@@ -177,13 +215,4 @@ const smallImageStyle = StyleSheet.create({
 		borderColor: Colors.green.darker,
 		borderWidth: 3,
 	},
-});
-
-const styles = StyleSheet.create({
-	containerImage: {
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 10,
-		height: 280
-	}
 });
